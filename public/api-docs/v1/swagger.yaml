@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: User API
   version: 1.0.0
-  description: API documentation for user authentication.
+  description: API documentation for user authentication in the Book Store app.
 
 paths:
   /api/v1/users/signup:
@@ -133,3 +133,57 @@ paths:
                     example: "Email is not registered"
                 example:
                   errors: "Wrong Password"
+
+  /api/v1/users/forget:
+    post:
+      summary: Forget Password
+      description: Initiates a password reset by sending an OTP to the user's registered email via RabbitMQ.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                      example: user@example.com
+                  required:
+                    - email
+      responses:
+        "200":
+          description: OTP successfully enqueued and sent to email
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "OTP has been sent to user@example.com, check your inbox"
+                  otp:
+                    type: integer
+                    example: 123456
+                  user_id:
+                    type: integer
+                    example: 123
+                  otp_generated_at:
+                    type: string
+                    format: date-time
+                    example: "2025-03-06T12:00:00Z"
+        "422":
+          description: Email not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: string
+                    example: "Email is not registered"

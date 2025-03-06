@@ -19,6 +19,15 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
+  def forgetPassword
+    result = UserService.forgetPassword(forget_params)
+    if result[:success]
+      render json: { message: result[:message], otp: result[:otp], user_id: result[:user_id]  }, status: :ok
+    else
+      render json: { errors: result[:error] }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def user_params
@@ -27,5 +36,9 @@ class Api::V1::UsersController < ApplicationController
 
   def login_params
     params.require(:user).permit(:email, :password)
+  end
+
+  def forget_params
+    params.require(:user).permit(:email)
   end
 end
