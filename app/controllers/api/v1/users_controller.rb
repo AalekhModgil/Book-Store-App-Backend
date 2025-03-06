@@ -28,6 +28,15 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
+  def resetPassword
+    result = UserService.resetPassword(params[:id], reset_params)
+    if result[:success]
+      render json: { message: result[:message] }, status: :ok
+    else
+      render json: { errors: result[:error] }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def user_params
@@ -41,4 +50,9 @@ class Api::V1::UsersController < ApplicationController
   def forget_params
     params.require(:user).permit(:email)
   end
+
+  def reset_params
+    params.require(:user).permit(:new_password, :otp)
+  end
+
 end

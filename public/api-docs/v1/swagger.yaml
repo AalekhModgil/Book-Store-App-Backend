@@ -178,7 +178,7 @@ paths:
                     format: date-time
                     example: "2025-03-06T12:00:00Z"
         "422":
-          description: Email not found
+          description: Email not found or OTP enqueue failed
           content:
             application/json:
               schema:
@@ -187,3 +187,71 @@ paths:
                   errors:
                     type: string
                     example: "Email is not registered"
+                example:
+                  errors: "Failed to send OTP, please try again"
+
+  /api/v1/users/reset/{id}:
+    post:
+      summary: Reset Password
+      description: Resets the user's password using a valid OTP received from the forget password endpoint.
+      tags:
+        - Authentication
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the user whose password is being reset
+          schema:
+            type: integer
+            example: 123
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    new_password:
+                      type: string
+                      format: password
+                      example: "NewPass@123"
+                    otp:
+                      type: integer
+                      example: 123456
+                  required:
+                    - new_password
+                    - otp
+      responses:
+        "200":
+          description: Password successfully reset
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Password successfully reset"
+        "422":
+          description: Validation error, user not found, or OTP invalid/expired
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: string
+                    example: "User not found"
+                examples:
+                  user_not_found:
+                    value:
+                      errors: "User not found"
+                  invalid_otp:
+                    value:
+                      errors: "Invalid or expired OTP"
+                  validation_error:
+                    value:
+                      errors: "Password can't be blank"

@@ -23,7 +23,7 @@ class UserService
   end
 
   def self.forgetPassword(forget_params)
-  user = User.find_by(email: forget_params[:email])
+    user = User.find_by(email: forget_params[:email])
     if user
       @@otp = rand(100000..999999)
       @@otp_generated_at = Time.current
@@ -36,6 +36,26 @@ class UserService
       end
     else
         { success: false, error: "Email is not registered" }
+    end
+  end
+
+  def self.resetPassword(user_id, reset_params)
+    user = User.find_by(id: user_id)
+    if !user
+      return { success: false, error: "User not found" }
+    end
+
+    if reset_params[:otp].to_i != @@otp || (Time.current - @@otp_generated_at > 2.minute)
+      return { success: false, error: "Invalid or expired OTP" }
+    end
+
+    if user.update(password: reset_params[:new_password])
+      @@otp = nil
+      @@otp_generated_at = nil
+      UserMailer.password_reset_success_email(user).deliver_later # Direct email, no queuing needed
+      { success: true, message: "Password successfully reset" }
+    else
+      { success: false, error: user.errors.full_messages }
     end
   end
 

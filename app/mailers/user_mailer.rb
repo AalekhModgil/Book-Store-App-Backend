@@ -14,4 +14,9 @@ class UserMailer < ApplicationMailer
     @otp = otp
     mail(to: @user.email, subject: "Your OTP for Password Reset - Book Store")
   end
+
+  def password_reset_success_email(user)
+    @user = user
+    mail(to: @user.email, subject: "Your Password Has Been Successfully Reset - Book Store")
+  end
 end
